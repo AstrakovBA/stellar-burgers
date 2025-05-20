@@ -1,6 +1,8 @@
+const testUrl = 'http://localhost:4000';
+
 describe('Проверяем доступность приложения', () => {
   it('сервис должен быть доступен по адресу localhost:4000', () => {
-    cy.visit('http://localhost:4000');
+    cy.visit(testUrl);
   });
 });
 
@@ -16,7 +18,7 @@ beforeEach(() => {
     fixture: 'user'
   }).as('getUser');
 
-  cy.visit('localhost:4000');
+  cy.visit(testUrl);
   cy.wait('@getIngredients');
   cy.wait('@getUser');
 });
