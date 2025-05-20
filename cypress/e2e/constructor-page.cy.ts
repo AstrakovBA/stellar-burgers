@@ -1,5 +1,28 @@
 const testUrl = 'http://localhost:4000';
 
+const SELECTORS = {
+  BUN_0: '[data-cy="bun_0"]',
+  INGREDIENT_0: '[data-cy="ingredient_0"]',
+  BUN_CONSTRUCTOR_UP: '[data-cy="bun_constructor_item_up"]',
+  BUN_CONSTRUCTOR_DOWN: '[data-cy="bun_constructor_item_down"]',
+  BUN_CONSTRUCTOR_UP_CLEAR: '[data-cy="bun_constructor_item_up_clear"]',
+  BUN_CONSTRUCTOR_DOWN_CLEAR: '[data-cy="bun_constructor_item_down_clear"]',
+  INGREDIENT_CONSTRUCTOR_ITEM: '[data-cy="ingredient_constructor_item"]',
+  MODAL_INGREDIENT: '[data-cy="modal_ingredient"]',
+  MODAL_OVERLAY: '[data-cy="modal_overlay"]',
+  INGREDIENT_MODAL_NAME: '[data-cy="ingredient_modal"] > .text_type_main-medium',
+  BTN_CLOSE_MODAL: '[data-cy="btn_close_modal"]',
+  NEW_ORDER_BTN: '[data-cy="new_order_btn"]',
+  NEW_ORDER_NUMBER: '[data-cy="new_order_number"]',
+};
+
+// Проверка, что конструктор пустой
+function checkEmptyConstructor() {
+  cy.get(SELECTORS.BUN_CONSTRUCTOR_UP_CLEAR).should('exist');
+  cy.get(SELECTORS.BUN_CONSTRUCTOR_DOWN_CLEAR).should('exist');
+  cy.get(SELECTORS.INGREDIENT_CONSTRUCTOR_ITEM).should('not.exist');
+}
+
 describe('Проверяем доступность приложения', () => {
   it('сервис должен быть доступен по адресу localhost:4000', () => {
     cy.visit(testUrl);
@@ -23,86 +46,64 @@ beforeEach(() => {
   cy.wait('@getUser');
 });
 
-afterEach('Очистка localStorege и Cookies', () => {
+afterEach('Очистка localStorage и Cookies', () => {
   cy.clearAllLocalStorage();
   cy.clearAllCookies();
 });
 
 describe('Проверка работоспособности страницы - ConstructorPage', () => {
   it('Проверка добавления ингредиентов в конструктор', () => {
-    cy.get('[data-cy="bun_constructor_item_up_clear"]').should('exist');
-    cy.get('[data-cy="bun_constructor_item_down_clear"]').should('exist');
-    cy.get('[data-cy="ingredient_constructor_item"]').should('not.exist');
+    checkEmptyConstructor();
 
-    cy.get('[data-cy="bun_0"]').should('exist');
-    cy.get('[data-cy="bun_0"] > .common_button').should('exist').click();
+    cy.get(SELECTORS.BUN_0).should('exist').find('.common_button').click();
+    cy.get(SELECTORS.INGREDIENT_0).should('exist').find('.common_button').click();
 
-    cy.get('[data-cy="ingredient_0"]').should('exist');
-    cy.get(':nth-child(4) > [data-cy="ingredient_0"] > .common_button')
-      .should('exist')
-      .click();
-    cy.get('[data-cy="bun_constructor_item_up"]').should('exist');
-    cy.get('[data-cy="bun_constructor_item_down"]').should('exist');
-    cy.get('[data-cy="ingredient_constructor_item"]').should('exist');
+    cy.get(SELECTORS.BUN_CONSTRUCTOR_UP).should('exist');
+    cy.get(SELECTORS.BUN_CONSTRUCTOR_DOWN).should('exist');
+    cy.get(SELECTORS.INGREDIENT_CONSTRUCTOR_ITEM).should('exist');
   });
 
-  it('Проверка открытия и закрытия модального окна одного ингредиента - через оверлей', () => {
+  it('Проверка открытия и закрытия модального окна через оверлей', () => {
     const ingredientName = 'Краторная булка N-200i';
 
-    cy.get('[data-cy="modal_ingredient"]').should('not.exist');
-    cy.get('[data-cy="bun_0"]').should('exist').click();
-    cy.get('[data-cy="modal_ingredient"]').should('be.visible');
-    cy.get('[data-cy="ingredient_modal"] > .text_type_main-medium').should(
-      'contain.text',
-      ingredientName
-    );
-    cy.get('[data-cy="modal_overlay"]').should('exist');
-    cy.get('[data-cy="modal_overlay"]').click({ force: true });
-    cy.get('[data-cy="modal_ingredient"]').should('not.exist');
-    cy.get('[data-cy="modal_overlay"]').should('not.exist');
+    cy.get(SELECTORS.MODAL_INGREDIENT).should('not.exist');
+    cy.get(SELECTORS.BUN_0).click();
+    cy.get(SELECTORS.MODAL_INGREDIENT).should('be.visible');
+    cy.get(SELECTORS.INGREDIENT_MODAL_NAME).should('contain.text', ingredientName);
+    cy.get(SELECTORS.MODAL_OVERLAY).click({ force: true });
+    cy.get(SELECTORS.MODAL_INGREDIENT).should('not.exist');
   });
 
-  it('Проверка открытия и закрытия модального окна одного ингредиента - через кнопку закрытия', () => {
+  it('Проверка открытия и закрытия модального окна через кнопку закрытия', () => {
     const ingredientName = 'Краторная булка N-200i';
 
-    cy.get('[data-cy="modal_ingredient"]').should('not.exist');
-    cy.get('[data-cy="bun_0"]').should('exist').click();
-    cy.get('[data-cy="modal_ingredient"]').should('be.visible');
-    cy.get('[data-cy="ingredient_modal"] > .text_type_main-medium').should(
-      'contain.text',
-      ingredientName
-    );
-    cy.get('[data-cy="btn_close_modal"]').click();
-    cy.get('[data-cy="modal_ingredient"]').should('not.exist');
+    cy.get(SELECTORS.MODAL_INGREDIENT).should('not.exist');
+    cy.get(SELECTORS.BUN_0).should('exist').click();
+    cy.get(SELECTORS.MODAL_INGREDIENT).should('be.visible');
+    cy.get(SELECTORS.INGREDIENT_MODAL_NAME).should('contain.text', ingredientName);
+    cy.get(SELECTORS.BTN_CLOSE_MODAL).click();
+    cy.get(SELECTORS.MODAL_INGREDIENT).should('not.exist');
   });
 
   it('Проверка полного цикла заказа товара', () => {
-    cy.get('[data-cy="bun_constructor_item_up_clear"]').should('exist');
-    cy.get('[data-cy="bun_constructor_item_down_clear"]').should('exist');
-    cy.get('[data-cy="ingredient_constructor_item"]').should('not.exist');
+    checkEmptyConstructor();
 
-    cy.get('[data-cy="bun_0"]').should('exist');
-    cy.get('[data-cy="bun_0"] > .common_button').should('exist').click();
-    cy.get('[data-cy="ingredient_0"]').should('exist');
-    cy.get(':nth-child(4) > [data-cy="ingredient_0"] > .common_button')
-      .should('exist')
-      .click();
+    cy.get(SELECTORS.BUN_0).should('exist').find('.common_button').click();
+    cy.get(SELECTORS.INGREDIENT_0).should('exist').find('.common_button').click();
 
     cy.intercept('POST', 'api/orders', {
       fixture: 'newOrder'
     }).as('newOrder');
 
-    cy.get('[data-cy="new_order_btn"]').click();
+    cy.get(SELECTORS.NEW_ORDER_BTN).click();
     cy.wait('@newOrder');
     cy.fixture('newOrder').then((newOrder) => {
-      cy.get('[data-cy="new_order_number"]').contains(newOrder.order.number);
+      cy.get(SELECTORS.NEW_ORDER_NUMBER).contains(newOrder.order.number);
     });
 
     cy.wait(1000);
 
-    cy.get('[data-cy="bun_constructor_item_up_clear"]').should('exist');
-    cy.get('[data-cy="bun_constructor_item_down_clear"]').should('exist');
-    cy.get('[data-cy="ingredient_constructor_item"]').should('not.exist');
-    cy.get('[data-cy="btn_close_modal"]').should('exist').click();
+    checkEmptyConstructor();
+    cy.get(SELECTORS.BTN_CLOSE_MODAL).should('exist').click();
   });
 });
